@@ -36,8 +36,9 @@ Variables
             p_min(s)                Minimum power of storage subsystem s (kWh)
             u(s,t)                  Indicator for subsystem is charging or discharging 
             
-            F_obj                       Variable for the objective function F
-            G_obj                       Variable for the objective function G                      
+            F_obj                   Variable for the objective function F
+            G_obj                   Variable for the objective function G
+            B(s,t,m)                Benefits for each use case
 
 *Variable types
 positive variables p, p_c, p_d, e, e_max, e_min, p_max;
@@ -49,8 +50,8 @@ Equations
 *Constraints
             e_balance_lo(s,t)       Lower bound of the energy balance equation
             e_balance_up(s,t)       Upper bound of the energy balance
-            p_balance_lo(s,t,m)     Lower bound of the power contribution
-            p_balance_up(s,t,m)     Upper bound of the power contribution
+            p_balance_lo(s,t)     Lower bound of the power contribution
+            p_balance_up(s,t)     Upper bound of the power contribution
             e_min_lo(s)             Lower bound of the minimum state of charge
             e_min_up(s)             Upper bound of the minimum state of charge
             e_max_lo(s)             Lower bound of the maximum state of charge
@@ -62,7 +63,7 @@ Equations
             p_c_up(s,s_prime,t)     Upper bound of the charging power of storage subsystem s
             beta_lo(s)              Lower bound of the parameter beta(s)
             gamma_lo(s)             Lower bound of the parameter gamma(s)
-            budget_lo(s)            Lower bound of the budget
+            budget_lo               Lower bound of the budget
             epsylon_lo(s)           Lower bound of epsylon
             epsylon_up(s)           Upper bound of epsylon
             Fvv_lo(s)               Lower bound of Fvv
@@ -72,11 +73,12 @@ Equations
 *Equations
 
             e_balance(s,t)          Energy balance for each storage subsystem
-            p_balance(s,t,m)        Power contribution for each use case and storage subsystem
+            p_balance(s,t)        Power contribution for each use case and storage subsystem
             e_min_max(s)            Relationship between min and max state of charge
             p_min_max(s)            Relationship between min and max power
-            B(s,t,m)                Benefits for each use case
-            Use_cases(s,t,m)        Use cases
+            Use_case1(s,t,m)        Use cases m = 1
+            Use_case2(s,t,m)        Use cases m = 2
+            Use_case3(s,t,m)        Use cases m = 3
 *            B(p(s,t,m))             Benefits for each use case
             Cost(s)                 Linear increasing costs
 *            Cost(p_max(s),e_max(s))    Linear increasing costs            
@@ -93,9 +95,9 @@ e_balance_lo(s,t)..             e_min(s) =l= e(s,t);
 
 e_balance_up(s,t)..             e(s,t) =l= e_max(s);             
 
-p_balance_lo(s,t,m)..           p_min(s) =l= sum(m, p(s,t,m));
+p_balance_lo(s,t)..             p_min(s) =l= sum(m, p(s,t,m));
 
-p_balance_up(s,t,m)..           sum(m, p(s,t,m)) =l= p_max(s);
+p_balance_up(s,t)..             sum(m, p(s,t,m)) =l= p_max(s);
 
 e_min_lo(s)..                   0 =l= e_min(s);
 
@@ -128,18 +130,18 @@ Fvv_lo(s)..                     10**(-16) =g= Fvv(s);
 
 Fvv_up(s)..                     Fvv(s) =l= 1;
 
-budget_lo(s)..                  sum(s,C(s)) =l= theta_max(s);
-*budget_lo(s)..                  sum(s,C(p_max(s),e_max(s))) =l= theta_max(s);
+budget_lo..                     sum(s,Cost(s)) =l= theta_max;
+*budget_lo..                     sum(s,C(p_max(s),e_max(s))) =l= theta_max;
                
 *Equations
 
 e_balance(s,t)..                e(s,t) =e= e(s,t-1) + delta*(C_eff(s)*sum(s_prime,p_c(s,s_prime,t))- sum(s_prime,p_d(s,s_prime,t)));
      
-p_balance(s,t,m)..              sum(m,p(s,t,m)) =e= sum(s_prime,D_eff(s_prime)*p_d(s,s_prime,t)-p_c(s,s_prime,t));
+p_balance(s,t)..                sum(m,p(s,t,m)) =e= sum(s_prime,D_eff(s_prime)*p_d(s,s_prime,t)-p_c(s,s_prime,t));
     
 e_min_max(s)..                  e_min(s) =e= epsylon(s)*e_max(s);                   
 
-p_min_max(s)..                  p_min(s) =e= (-Fvv)*p_max(s);
+p_min_max(s)..                  p_min(s) =e= (-Fvv(s))*p_max(s);
 
 
 *Objective functions
@@ -147,24 +149,24 @@ p_min_max(s)..                  p_min(s) =e= (-Fvv)*p_max(s);
 Objective_F..                   F_obj = sum(t,sum(s, sum(m, B(s,t,m))));
 *Objective_F..                   F = sum(t,sum(s, sum(m, B(p(s,t,m)))));
 
-Objective_G..                   G_obj = sum(s,C(s)- sum(t,sum(s, sum(m, B(s,t,m))));
+Objective_G..                   G_obj = sum(s,Cost(s)- sum(t,sum(s, sum(m, B(s,t,m))));
 *Objective_G..                   G = sum(s,C(p_max(s),e_max(s)))- sum(t,sum(s, sum(m, B(p(s,t,m)))));
 
 *Different equations of B depending on the use case
 
 *Peak Shaving (m = 1)
 
-Use_cases(s,t,m)$ (ord(m) EQ 1)..       B(s,t,m) =e= lambda(t,1)*p(s,t,1)+alpha(t)*p(s,t,1);    
+Use_case1(s,t,m)$ (ord(m) EQ 1)..       B(s,t,m) =e= lambda(t,'1')*p(s,t,1)+alpha(t)*p(s,t,1);    
 *Use_cases(p(s,t,m))$ (ord(m) EQ 1)..    B(s,t,m) =e= lambda(t,1)*p(s,t,1)+alpha(t)*p(s,t,1);   
 
 *Balancing (m = 2)
 
-Use_cases(s,t,m)$ (ord(m) EQ 2)..       B(s,t,m) =e= (-lambda(t,2))*abs(g_a(t) + p(s,t,2) - g_t(t)) + alpha(t)*p(s,t,2);
+Use_case2(s,t,m)$ (ord(m) EQ 2)..       B(s,t,m) =e= (-lambda(t,'2'))*abs(g_a(t) + p(s,t,'2') - g_t(t)) + alpha(t)*p(s,t,'2');
 *Use_cases(p(s,t,m))$ (ord(m) EQ 2)..    B(s,t,m) =e= (-lambda(t,2))*abs(g_a(t) + p(s,t,2) - g_t(t)) + alpha(t)*p(s,t,2);
 
 *Price arbitrage (m = 3)
 
-Use_cases(s,t,m)$ (ord(m) EQ 3)..       B(s,t,m) =e= alpha(t)*p(s,t,3);
+Use_case3(s,t,m)$ (ord(m) EQ 3)..       B(s,t,m) =e= alpha(t)*p(s,t,'3');
 *Use_cases(p(s,t,m))$ (ord(m) EQ 3)..    B(s,t,m) =e= alpha(t)*p(s,t,3);
 
 lambda_lo(t,m)$(ord(m) EQ 1)..          lambda(t,m) =g= 10**(-16);
@@ -178,9 +180,9 @@ model benefits /all/;
 
 model costs /all/;
 
-solve benefits using lp maximizing F;
+solve benefits using lp maximizing F_obj;
 
-solve costs using lp minimizing G;
+solve costs using lp minimizing G_obj;
            
 
 
