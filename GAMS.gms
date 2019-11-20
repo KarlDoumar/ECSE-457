@@ -3,11 +3,10 @@ Scalar
 Sets
             m                       Index of energy storage use cases 1 to M    /1*3/
             s                       Index of energy storage subsystems 1 to n to S /1*10/
-            Li(s)                   Dynamic set of lithium-ion batteries /2/
+            Li(s)                   Dynamic set of lithium-ion batteries /2,3/
             Fly(s)                  Dynamic set of flywheels /1/
             t                       Index of time periods 0 to T /1*288/
-*            t0(m)                   Set of time periods during which use cas m is deployed 
-*****Check logic of prime... might need to change something (like add that s_prime cannot be equal to s in constraints??)
+*            t0(m)                   Set of time periods during which use cas m is deployed
             Alias(s,s_prime);
     
 Parameters
@@ -17,7 +16,6 @@ Parameters
             D_eff(s)                Discharging efficiency of storage subsystem s (p.u.) /set.Li 0.85, set.Fly 0.97/
             D_eff_prime(s_prime)    Discharging efficiency of storage subsystem s_prime (p.u.) /set.Li 0.85, set.Fly 0.97/
             delta                   Time step duration (h) /0.0833333/
-            lambda(t,m)             Value of energy storage use case m in time period t ($ per kW)
 ************ Do three trials one where assumption is batteries start at full charge, another at no charge amd finally at mid charge?
             e_0(s)                  Inital state of charge of storage subsystem s (kWh)/set.Li 100, set.Fly 25/ 
             g_a(t)                  Actual renewable energy generation in time period t (kW)
@@ -30,7 +28,16 @@ Parameters
             epsylon(s)              Coefficient relating the maximum and minimum state of charge of storage subsystem s (p.u.) /set.Li 0.85, set.Fly 0.8/
             Fvv(s)                  Coefficient relating the maximum and minimum power of storage subsystem s (p.u.)/set.Li 0.8, set.Fly 0.5/
 *            theta_max               Investment budget ($) /15000000/
+            lambda(t,m)             Value of the use case m at time t
+                /1*72.1*2    0.03
+                 73*122.1*2  0.06
+                 123*194.1*2 0.01
+                 195*218.1*2 0.06
+                 219*288.1*2 0.03
+                 1*288.3     0.00
+                /;
 ;
+
 *$include "TOU.gms";
 $include "TOU_day_winter.gms";
 *$include "TOU_day_summer.gms";
@@ -232,6 +239,6 @@ Use_case1, Use_case2, abs_pos, abs_neg, abs_const, Use_case3, lambda_lo1, lambda
 *)
 
 
-
+ 
 
 
