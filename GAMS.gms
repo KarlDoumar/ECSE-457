@@ -90,8 +90,8 @@ Equations
             beta_lo(s)              Lower bound of the parameter beta(s)
             gam_lo(s)               Lower bound of the parameter gam(s)
 *            budget_lo               Lower bound of the budget
-            epsylon_lo(s)           Lower bound of epsylon
-            epsylon_up(s)           Upper bound of epsylon
+            eps_lo(s)               Lower bound of epsylon
+            eps_up(s)               Upper bound of epsylon
             Fvv_lo(s)               Lower bound of Fvv
             Fvv_up(s)               Upper bound of Fvv
             lambda_lo1(t,m)         Lower bound of lambda
@@ -153,11 +153,11 @@ beta_lo(s)..                    0 =l= beta(s);
 
 gam_lo(s)..                     0 =l= gam(s);
 
-epsylon_lo(s)..                 0 =l= epsylon(s);
+eps_lo(s)..                     0 =l= epsylon(s);
 
-epsylon_up(s)..                 epsylon(s) =l= 0.9999999999999999;
+eps_up(s)..                     epsolyn(s) =l= 0.9999999999999999;
 
-Fvv_lo(s)..                     10**(-16) =g= Fvv(s);
+Fvv_lo(s)..                     10**(-16) =l= Fvv(s);
 
 Fvv_up(s)..                     Fvv(s) =l= 1;
 
@@ -215,10 +215,10 @@ lambda_lo2(t,m)$(ord(m) EQ 2)..            lambda(t,m) =g= 0;
 lambda_eq3(t,m)$(ord(m) EQ 3)..            lambda(t,m) =e= 0;
 
 *Will change the all later!
-model benefits /Objective_F, e_balance_lo, e_balance_up, p_balance_lo, p_balance_up, e_min_lo, e_min_up, e_max_lo, p_max_lo, p_min_up, p_d_lo, p_d_up, p_c_lo, p_c_up, beta_lo, gam_lo, epsylon_lo, epsylon_up, Fvv_lo, Fvv_up, e_balance, p_balance, e_min_max, p_min_max,
+model benefits /Objective_F, e_balance_lo, e_balance_up, p_balance_lo, p_balance_up, e_min_lo, e_min_up, e_max_lo, p_max_lo, p_min_up, p_d_lo, p_d_up, p_c_lo, p_c_up, beta_lo, gam_lo, eps_lo, eps_up, Fvv_lo, Fvv_up, e_balance, p_balance, e_min_max, p_min_max,
 Use_case1, Use_case2, abs_pos, abs_neg, abs_const, Use_case3, lambda_lo1, lambda_lo2, lambda_eq3/;
 
-model costs /Objective_G, e_balance_lo, e_balance_up, p_balance_lo, p_balance_up, e_min_lo, e_min_up, e_max_lo, p_max_lo, p_min_up, p_d_lo, p_d_up, p_c_lo, p_c_up, beta_lo, gam_lo, epsylon_lo, epsylon_up, Fvv_lo, Fvv_up, e_balance, p_balance, e_min_max, p_min_max,
+model costs /Objective_G, e_balance_lo, e_balance_up, p_balance_lo, p_balance_up, e_min_lo, e_min_up, e_max_lo, p_max_lo, p_min_up, p_d_lo, p_d_up, p_c_lo, p_c_up, beta_lo, gam_lo, eps_lo, eps_up, Fvv_lo, Fvv_up, e_balance, p_balance, e_min_max, p_min_max,
 Use_case1, Use_case2, abs_pos, abs_neg, abs_const, Use_case3, lambda_lo1, lambda_lo2, lambda_eq3, Budget/;
 
 *Export results to gds, or export them into mathlab
