@@ -155,7 +155,7 @@ gam_lo(s)..                     0 =l= gam(s);
 
 eps_lo(s)..                     0 =l= epsylon(s);
 
-eps_up(s)..                     epsolyn(s) =l= 0.9999999999999999;
+eps_up(s)..                     epsylon(s) =l= 0.9999999999999999;
 
 Fvv_lo(s)..                     10**(-16) =l= Fvv(s);
 
