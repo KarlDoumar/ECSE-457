@@ -55,7 +55,7 @@ $include "Target_Solar_Day_winter.gms"
 **Something about options??? TO CHECK OUT WHAT THAT IS
 
 Variables
-            p(s,t,m)                Net power of storage subsystem s during time period t allocated to storage use casem m (kW)
+            p(s,t,m)                Net power of storage subsystem s during time period t allocated to storage use case m (kW)
             p_c(s,s_prime,t)        Charging power of storage subsystem s from storage subsystem s_prime during time period t (kW)
             p_d(s,s_prime,t)        Discharging power of storage subsystem s from storage subsystem s_prime during time period t (kW)
             e(s,t)                  State of charge of storage subsystem s in period t (kWh)
@@ -72,11 +72,11 @@ Variables
             y(s,t,m)                For linear purposes
 
 *Variable types
-positive variables p, p_c, p_d, e, e_max, e_min, p_max, p_min;
-*negative variables p_min;
+positive variables p, p_c, p_d, e, e_max, e_min, p_max;
+negative variables p_min;
 binary variables u;
 
-*Initial conditions TABARNAK D'ESTI DE MERDE
+*Initial conditions 
 
 e.fx('1','1') = e_0('1');
 e.fx('2','1') = e_0('2');
@@ -88,6 +88,19 @@ e.fx('7','1') = e_0('7');
 e.fx('8','1') = e_0('8');
 e.fx('9','1') = e_0('9');
 e.fx('10','1') = e_0('10');
+
+**********************************************Check and see if this is okay or if we should stick to only e!!!!!!!
+p.fx('1','1',m) = rho('1')*e_0('1');
+p.fx('2','1',m) = rho('1')*e_0('2');
+p.fx('3','1',m) = rho('1')*e_0('3');
+p.fx('4','1',m) = rho('1')*e_0('4');
+p.fx('5','1',m) = rho('1')*e_0('5');
+p.fx('6','1',m) = rho('1')*e_0('6');
+p.fx('7','1',m) = rho('1')*e_0('7');
+p.fx('8','1',m) = rho('1')*e_0('8');
+p.fx('9','1',m) = rho('1')*e_0('9');
+p.fx('10','1',m) =rho('1')* e_0('10');
+************************************************************************************************************************
 
 Equations
 *Constraints
@@ -158,7 +171,7 @@ p_max_lo(s)..                   p_max(s) =g= 0;
 
 *p_max_lo(s)..                  10**(-16) =l= p_max(s);
 
-p_min_up(s)..                   p_min(s) =l= 0;
+*p_min_up(s)..                   p_min(s) =l= 0;
 
 *p_min_up(s)..                                              p_min(s) =l= 10**(-16);
 
@@ -197,7 +210,9 @@ p_c_up(s,s_prime,t)..           p_c(s,s_prime,t) =l= p_max(s);
 
               
 *Equations
-e_balance(s,t)..                e(s,t) =e= e(s,t-1) + delta*(C_eff(s)*sum(s_prime,p_c(s,s_prime,t))- sum(s_prime,p_d(s,s_prime,t)));
+e_balance(s,t)..  e(s,t) =e= e(s,t-1) + delta*(C_eff(s)*sum(s_prime,p_c(s,s_prime,t))- sum(s_prime,p_d(s,s_prime,t)));
+
+*e_balance(s,t)$(ord(t) EQ 2)..  e(s,t) =e= e(s,t-1) + delta*(C_eff(s)*sum(s_prime,p_c(s,s_prime,t))- sum(s_prime,p_d(s,s_prime,t)));
      
 p_balance(s,t)..                sum(m,p(s,t,m)) =e= sum(s_prime,D_eff_prime(s_prime)*p_d(s,s_prime,t)-p_c(s,s_prime,t));
 
@@ -223,26 +238,26 @@ Objective_G..                   G_obj =e= sum(s,Cost(s))- sum((t,s,m), B(s,t,m))
 
 *Peak Shaving (m = 1)
 
-Use_case1(s,t,m)$ (ord(m) EQ 1)..          B(s,t,'1') =e= lambda(t,'1')*p(s,t,'1')+alpha(t)*p(s,t,'1');    
+Use_case1(s,t,m)$ (ord(m) EQ 1)..          B(s,t,m) =e= lambda(t,'1')*p(s,t,'1')+alpha(t)*p(s,t,'1');    
 
 
 *Balancing (m = 2)
 
             
 
-Use_case2(s,t,m)$(ord(m) EQ 2)..           B(s,t,'2') =g= (-lambda(t,'2'))*y(s,t,m) + alpha(t)*p(s,t,'2');
+Use_case2(s,t,m)$(ord(m) EQ 2)..           B(s,t,m) =g= (-lambda(t,'2'))*y(s,t,m) + alpha(t)*p(s,t,'2');
 
-abs_pos(s,t,m)$(ord(m) EQ 2)..             y(s,t,'2') =g= (g_a(t) + p(s,t,'2') - g_t(t));
+abs_pos(s,t,m)$(ord(m) EQ 2)..             y(s,t,m) =g= (g_a(t) + p(s,t,'2') - g_t(t));
 
-abs_neg(s,t,m)$(ord(m) EQ 2)..             y(s,t,'2') =g= -1*(g_a(t) + p(s,t,'2') - g_t(t));
+abs_neg(s,t,m)$(ord(m) EQ 2)..             y(s,t,m) =g= -1*(g_a(t) + p(s,t,'2') - g_t(t));
 
-abs_const(s,t,m)$(ord(m) EQ 2)..           y(s,t,'2') =g= 0;
+abs_const(s,t,m)$(ord(m) EQ 2)..           y(s,t,m) =g= 0;
 
 
 
 *Price arbitrage (m = 3)
 
-Use_case3(s,t,m)$ (ord(m) EQ 3)..          B(s,t,'3') =e= alpha(t)*p(s,t,'3');
+Use_case3(s,t,m)$ (ord(m) EQ 3)..          B(s,t,m) =e= alpha(t)*p(s,t,'3');
 
 *lambda_lo1(t,m)$(ord(m) EQ 1)..            lambda(t,'1') =g= 10**(-16);
 
@@ -251,11 +266,11 @@ Use_case3(s,t,m)$ (ord(m) EQ 3)..          B(s,t,'3') =e= alpha(t)*p(s,t,'3');
 *lambda_eq3(t,m)$(ord(m) EQ 3)..            lambda(t,'3') =e= 0;
 
 *Will change the all later!
-model benefits /Objective_F, e_balance_lo, e_balance_up, p_balance_lo, p_balance_up, e_min_lo, e_min_up, e_max_lo, p_max_lo, p_min_up, p_d_lo, p_d_up, p_c_lo, p_c_up, e_balance, p_balance, e_min_max, p_min_max,
+model benefits /Objective_F, e_balance_lo, e_balance_up, p_balance_lo, p_balance_up, e_min_lo, e_min_up, e_max_lo, p_max_lo, p_d_lo, p_d_up, p_c_lo, p_c_up, e_balance, p_balance, e_min_max, p_min_max,
 Use_case1, Use_case2, abs_pos, abs_neg, abs_const, Use_case3/;
 
-model costs /Objective_G, e_balance_lo, e_balance_up, p_balance_lo, p_balance_up, e_min_lo, e_min_up, e_max_lo, p_max_lo, p_min_up, p_d_lo, p_d_up, p_c_lo, p_c_up, e_balance, p_balance, e_min_max, p_min_max,
-Use_case1, Use_case2, abs_pos, abs_neg, abs_const, Use_case3, Budget/;
+model costs /Objective_G, e_balance_lo, e_balance_up, p_balance_lo, p_balance_up, e_min_lo, e_min_up, e_max_lo, p_max_lo, p_d_lo, p_d_up, p_c_lo, p_c_up, e_balance, p_balance, e_min_max, p_min_max,
+Use_case1, Use_case2, abs_pos, abs_neg, abs_const, Use_case3,Budget/;
 
 *Export results to gds, or export them into mathlab
 *Do a grid for the index of each subsystem and then change place in the grad for each iteration
@@ -273,4 +288,8 @@ Use_case1, Use_case2, abs_pos, abs_neg, abs_const, Use_case3, Budget/;
     
 *    fly(s) = yes;
 *)
+
+
+ 
+
 
