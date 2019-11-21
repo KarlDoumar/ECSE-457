@@ -72,8 +72,8 @@ Variables
             y(s,t,m)                For linear purposes
 
 *Variable types
-positive variables p, p_c, p_d, e, e_max, e_min, p_max;
-negative variables p_min;
+positive variables p, p_c, p_d, e, e_max, e_min, p_max, p_min;
+*negative variables p_min;
 binary variables u;
 
 *Initial conditions 
@@ -89,18 +89,42 @@ e.fx('8','1') = e_0('8');
 e.fx('9','1') = e_0('9');
 e.fx('10','1') = e_0('10');
 
-**********************************************Check and see if this is okay or if we should stick to only e!!!!!!!
-p.fx('1','1',m) = rho('1')*e_0('1');
-p.fx('2','1',m) = rho('1')*e_0('2');
-p.fx('3','1',m) = rho('1')*e_0('3');
-p.fx('4','1',m) = rho('1')*e_0('4');
-p.fx('5','1',m) = rho('1')*e_0('5');
-p.fx('6','1',m) = rho('1')*e_0('6');
-p.fx('7','1',m) = rho('1')*e_0('7');
-p.fx('8','1',m) = rho('1')*e_0('8');
-p.fx('9','1',m) = rho('1')*e_0('9');
-p.fx('10','1',m) =rho('1')* e_0('10');
+**********************************************Check and see if this is okay *******************************************
+p.fx('1','1',m) = 1/rho('1')*e_0('1');
+p.fx('2','1',m) = 1/rho('2')*e_0('2');
+p.fx('3','1',m) = 1/rho('3')*e_0('3');
+p.fx('4','1',m) = 1/rho('4')*e_0('4');
+p.fx('5','1',m) = 1/rho('5')*e_0('5');
+p.fx('6','1',m) = 1/rho('6')*e_0('6');
+p.fx('7','1',m) = 1/rho('7')*e_0('7');
+p.fx('8','1',m) = 1/rho('8')*e_0('8');
+p.fx('9','1',m) = 1/rho('9')*e_0('9');
+p.fx('10','1',m) =1/rho('10')* e_0('10');
+
+p_max.fx('1') = 1/rho('1')*e_0('1');
+p_max.fx('2') = 1/rho('2')*e_0('2');
+p_max.fx('3') = 1/rho('3')*e_0('3');
+p_max.fx('4') = 1/rho('4')*e_0('4');
+p_max.fx('5') = 1/rho('5')*e_0('5');
+p_max.fx('6') = 1/rho('6')*e_0('6');
+p_max.fx('7') = 1/rho('7')*e_0('7');
+p_max.fx('8') = 1/rho('8')*e_0('8');
+p_max.fx('9') = 1/rho('9')*e_0('9');
+p_max.fx('10') =1/rho('10')* e_0('10');
+
+e_max.fx('1') = e_0('1');
+e_max.fx('2') = e_0('2');
+e_max.fx('3') = e_0('3');
+e_max.fx('4') = e_0('4');
+e_max.fx('5') = e_0('5');
+e_max.fx('6') = e_0('6');
+e_max.fx('7') = e_0('7');
+e_max.fx('8') = e_0('8');
+e_max.fx('9') = e_0('9');
+e_max.fx('10') = e_0('10');
 ************************************************************************************************************************
+
+
 
 Equations
 *Constraints
@@ -117,29 +141,21 @@ Equations
             p_d_up(s,s_prime,t)     Upper bound of the discharging power of storage subsystem s
             p_c_lo(s,s_prime,t)     Lower bound of the charging power of storage subsystem s
             p_c_up(s,s_prime,t)     Upper bound of the charging power of storage subsystem s
-*            beta_lo(s)              Lower bound of the parameter beta(s)
-*            gam_lo(s)               Lower bound of the parameter gam(s)
-*            budget_lo               Lower bound of the budget
-*            eps_lo(s)               Lower bound of epsylon
-*            eps_up(s)               Upper bound of epsylon
-*            Fvv_lo(s)               Lower bound of Fvv
-*            Fvv_up(s)               Upper bound of Fvv
-*            lambda_lo1(t,m)         Lower bound of lambda
-*            lambda_lo2(t,m)         Lower bound of lambda
-*            lambda_eq3(t,m)         Upper bound of lambda
             abs_const(s,t,m)        Constraint for absolute function
             abs_pos(s,t,m)          Function for absolute function
             abs_neg(s,t,m)          Function for absolute function
+            p_min_lo(s)
             
 *Equations
 
-            e_balance(s,t)          Energy balance for each storage subsystem
+*            e_balance_1(s,t)          Energy balance for each storage subsystem (initialization)
+            e_balance_2(s,t)        Energy balance for each storage subsystem
             p_balance(s,t)          Power contribution for each use case and storage subsystem
             e_min_max(s)            Relationship between min and max state of charge
             p_min_max(s)            Relationship between min and max power
-            Use_case1(s,t,m)        Use cases m is 1
+*            Use_case1(s,t,m)        Use cases m is 1
             Use_case2(s,t,m)        Use cases m is 2 (absolute value)
-            Use_case3(s,t,m)        Use cases m is 3
+*            Use_case3(s,t,m)        Use cases m is 3
             Budget(s)               Cost of the whole operation
          
 
@@ -153,141 +169,82 @@ Equations
 *Constraints
 e_balance_lo(s,t)..             e(s,t) =g= e_min(s);
 
-e_balance_up(s,t)..             e(s,t) =l= e_max(s);             
+e_balance_up(s,t)..             e(s,t) =l= e_max(s);
 
 p_balance_lo(s,t)..             p_min(s) =l= sum(m, p(s,t,m));
 
-p_balance_up(s,t)..             sum(m, p(s,t,m)) =l= p_max(s);
+p_balance_up(s,t)..             p_max(s) =g= sum(m, p(s,t,m));
         
-e_min_lo(s)..                   0 =l= e_min(s);
-
-e_min_up(s)..                   e_min(s) =l= e_max(s);
-
-*e_min_up(s)..                  e_min(s) =l= 0.9999999999999999*e_max(s);
-
-e_max_lo(s)..                   rho(s)*p_max(s) =l= e_max(s);
-
-p_max_lo(s)..                   p_max(s) =g= 0;
-
-*p_max_lo(s)..                  10**(-16) =l= p_max(s);
-
-*p_min_up(s)..                   p_min(s) =l= 0;
-
-*p_min_up(s)..                                              p_min(s) =l= 10**(-16);
-
 p_d_lo(s,s_prime,t)..           p_d(s,s_prime,t) =g= 0;
                    
 p_d_up(s,s_prime,t)..           p_d(s,s_prime,t) =l= p_min(s)*(-1);
   
 p_c_lo(s,s_prime,t)..           p_c(s,s_prime,t) =g= 0;
 
-p_c_up(s,s_prime,t)..           p_c(s,s_prime,t) =l= p_max(s);
+p_c_up(s,s_prime,t)$(u(s,t) EQ 0)..           p_c(s,s_prime,t) =l= p_max(s);
 
-*p_d_up(s,s_prime,t)$((ord(s) NE ord(s_prime)))..           p_d(s,s_prime,t) =l= p_min(s)*(-1);
-  
-*p_c_lo(s,s_prime,t)$(ord(s) NE ord(s_prime))..             0 =l= p_c(s,s_prime,t);
-
-*p_c_up(s,s_prime,t)$((ord(s) NE ord(s_prime)))..           p_c(s,s_prime,t) =l= p_max(s);
-
-
-*beta_lo(s)..                    0 =l= beta(s);
-
-*gam_lo(s)..                     0 =l= gam(s);
-
-*eps_lo(s)..                     0 =l= epsylon(s);
-
-*eps_up(s)..                     epsylon(s) =l= 1;
-
-*eps_up(s)..                     epsylon(s) =l= 0.9999999999999999;
-
-*Fvv_lo(s)..                     0 =l= Fvv(s);
-
-*Fvv_lo(s)..                     10**(-16) =l= Fvv(s);
-
-*Fvv_up(s)..                     Fvv(s) =l= 1;
-
-*budget_lo..                     sum(s,Cost(s)) =l= theta_max;
-
+charging(s,t)$()
               
 *Equations
-e_balance(s,t)..  e(s,t) =e= e(s,t-1) + delta*(C_eff(s)*sum(s_prime,p_c(s,s_prime,t))- sum(s_prime,p_d(s,s_prime,t)));
 
-*e_balance(s,t)$(ord(t) EQ 2)..  e(s,t) =e= e(s,t-1) + delta*(C_eff(s)*sum(s_prime,p_c(s,s_prime,t))- sum(s_prime,p_d(s,s_prime,t)));
+e_balance_2(s,t)$(ord(t) GT 1)..                e(s,t) =e= e(s,t-1) + delta*(C_eff(s)*sum(s_prime,p_c(s,s_prime,t))- sum(s_prime,p_d(s,s_prime,t)));
      
-p_balance(s,t)..                sum(m,p(s,t,m)) =e= sum(s_prime,D_eff_prime(s_prime)*p_d(s,s_prime,t)-p_c(s,s_prime,t));
+p_balance(s,t)$(ord(t) GT 1)..                  sum(m,p(s,t,m)) =e= sum(s_prime,D_eff_prime(s_prime)*p_d(s,s_prime,t)-p_c(s,s_prime,t));
 
+e_min_max(s)..                                  e_min(s) =e= epsylon(s)*e_max(s);                   
 
-*e_balance(s,t)..                e(s,t) =e= e(s,t-1) + delta*(C_eff(s)*sum(s_prime$(ord(s_prime) NE ord(s)),p_c(s,s_prime,t))- sum(s_prime$(ord(s_prime) NE ord(s)),p_d(s,s_prime,t)));
-     
-*p_balance(s,t)..                sum(m,p(s,t,m)) =e= sum(s_prime$(ord(s_prime) NE ord(s)),D_eff_prime(s_prime)*p_d(s,s_prime,t)-p_c(s,s_prime,t));
-    
-e_min_max(s)..                  e_min(s) =e= epsylon(s)*e_max(s);                   
+p_min_max(s)..                                  p_min(s) =e= (-Fvv(s))*p_max(s);
 
-p_min_max(s)..                  p_min(s) =e= (-Fvv(s))*p_max(s);
-
-Budget(s)..                     Cost(s) =e= beta(s)*p_max(s)+ gam(s)*e_max(s);
+Budget(s)..                                     Cost(s) =e= beta(s)*p_max(s)+ gam(s)*e_max(s);
 
 *Objective functions
 
-Objective_F..                   F_obj =e= sum((t,s,m),B(s,t,m));
+Objective_F..                                   F_obj =e= sum((t,s,m),B(s,t,m));
 
 
-Objective_G..                   G_obj =e= sum(s,Cost(s))- sum((t,s,m), B(s,t,m));
+Objective_G..                                   G_obj =e= sum(s,Cost(s))- sum((t,s,m), B(s,t,m));
 
 *Different equations of B depending on the use case
 
 *Peak Shaving (m = 1)
 
-Use_case1(s,t,m)$ (ord(m) EQ 1)..          B(s,t,m) =e= lambda(t,'1')*p(s,t,'1')+alpha(t)*p(s,t,'1');    
+*Use_case1(s,t,m)$ (ord(m) EQ 1)..          B(s,t,'1') =e= lambda(t,'1')*p(s,t,'1')+alpha(t)*p(s,t,'1');    
 
 
 *Balancing (m = 2)
 
             
 
-Use_case2(s,t,m)$(ord(m) EQ 2)..           B(s,t,m) =g= (-lambda(t,'2'))*y(s,t,m) + alpha(t)*p(s,t,'2');
+Use_case2(s,t,m)$(ord(m) EQ 2)..           B(s,t,'2') =g= (-lambda(t,'2'))*y(s,t,m) + alpha(t)*p(s,t,'2');
 
-abs_pos(s,t,m)$(ord(m) EQ 2)..             y(s,t,m) =g= (g_a(t) + p(s,t,'2') - g_t(t));
+abs_pos(s,t,m)$(ord(m) EQ 2)..             y(s,t,'2') =g= (g_a(t) + p(s,t,'2') - g_t(t));
 
-abs_neg(s,t,m)$(ord(m) EQ 2)..             y(s,t,m) =g= -1*(g_a(t) + p(s,t,'2') - g_t(t));
+abs_neg(s,t,m)$(ord(m) EQ 2)..             y(s,t,'2') =g= -1*(g_a(t) + p(s,t,'2') - g_t(t));
 
-abs_const(s,t,m)$(ord(m) EQ 2)..           y(s,t,m) =g= 0;
+abs_const(s,t,m)$(ord(m) EQ 2)..           y(s,t,'2') =g= 0;
 
 
 
 *Price arbitrage (m = 3)
 
-Use_case3(s,t,m)$ (ord(m) EQ 3)..          B(s,t,m) =e= alpha(t)*p(s,t,'3');
+*Use_case3(s,t,m)$ (ord(m) EQ 3)..          B(s,t,'3') =e= alpha(t)*p(s,t,'3');
 
-*lambda_lo1(t,m)$(ord(m) EQ 1)..            lambda(t,'1') =g= 10**(-16);
 
-*lambda_lo2(t,m)$(ord(m) EQ 2)..            lambda(t,'2') =g= 0;
-
-*lambda_eq3(t,m)$(ord(m) EQ 3)..            lambda(t,'3') =e= 0;
 
 *Will change the all later!
-model benefits /Objective_F, e_balance_lo, e_balance_up, p_balance_lo, p_balance_up, e_min_lo, e_min_up, e_max_lo, p_max_lo, p_d_lo, p_d_up, p_c_lo, p_c_up, e_balance, p_balance, e_min_max, p_min_max,
-Use_case1, Use_case2, abs_pos, abs_neg, abs_const, Use_case3/;
+model benefits /Objective_F, e_balance_lo, e_balance_up, p_balance_lo, p_balance_up, p_d_lo, p_d_up, p_c_lo, p_c_up, e_balance_2, p_balance, e_min_max, p_min_max, Use_case2, abs_pos, abs_neg, abs_const/;
 
-model costs /Objective_G, e_balance_lo, e_balance_up, p_balance_lo, p_balance_up, e_min_lo, e_min_up, e_max_lo, p_max_lo, p_d_lo, p_d_up, p_c_lo, p_c_up, e_balance, p_balance, e_min_max, p_min_max,
-Use_case1, Use_case2, abs_pos, abs_neg, abs_const, Use_case3,Budget/;
+model costs /Objective_G, e_balance_lo, e_balance_up, p_balance_lo, p_balance_up, p_d_lo, p_d_up, p_c_lo, p_c_up, e_balance_2, p_balance, e_min_max, p_min_max, Use_case2, abs_pos, abs_neg, abs_const,Budget/;
 
 *Export results to gds, or export them into mathlab
 *Do a grid for the index of each subsystem and then change place in the grad for each iteration
 *for(count = 3 to (card(s)+1)
     
-*    for(s = count+1 to card(s)+1
-    
-        solve benefits maximizing F_obj using mip;
+   
+solve benefits maximizing F_obj using mip;
 
-        solve costs minimizing G_obj using mip;
+solve costs minimizing G_obj using mip;
         
-*        Li(s) = yes;
-
-*    )
-    
-*    fly(s) = yes;
-*)
 
 
  
